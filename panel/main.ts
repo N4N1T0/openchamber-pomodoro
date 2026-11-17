@@ -201,12 +201,18 @@ const render = (): void => {
   renderProblem();
 };
 
+/** False until the first read: a session that ended while the panel was closed is shown, not announced phase by phase. */
+let primed = false;
+
 const apply = (next: Snapshot): void => {
-  for (const segment of next.entered) announce(segment, next.run?.preset.rounds ?? segment.round);
-  if (next.finished) {
-    beep();
-    void host.toast({ kind: 'success', message: 'Session complete.' }).catch(() => undefined);
+  if (primed) {
+    for (const segment of next.entered) announce(segment, next.run?.preset.rounds ?? segment.round);
+    if (next.finished) {
+      beep();
+      void host.toast({ kind: 'success', message: 'Session complete.' }).catch(() => undefined);
+    }
   }
+  primed = true;
 
   const changed = JSON.stringify(run) !== JSON.stringify(next.run);
   run = next.run;
