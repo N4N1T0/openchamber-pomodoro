@@ -8,7 +8,14 @@ import {
   mountTextField,
 } from '@openchamber/sdk/ui';
 import { BUILT_IN_PRESETS, DEFAULT_PRESET_ID, isBuiltIn } from './presets';
-import { createRunStore, readCustomPresets, writeCustomPresets, type Snapshot } from './store';
+import {
+  createRunStore,
+  readCustomPresets,
+  readSelected,
+  writeCustomPresets,
+  writeSelected,
+  type Snapshot,
+} from './store';
 import {
   currentSegment,
   formatClock,
@@ -151,8 +158,7 @@ const renderRounds = (): void => {
   segments.forEach((segment, index) => {
     const row = element('div', 'seg');
     row.dataset.state = index < doneBefore ? 'done' : index === current ? 'current' : 'todo';
-    const name = segment.phase === 'work' ? 'Work' : 'Rest';
-    row.textContent = `${name} · round ${segment.round} · ${segment.ms / MINUTE_MS} min`;
+    row.textContent = segment.phase === 'work' ? 'Work' : 'Rest';
     roundsEl.append(row);
   });
 };
@@ -168,7 +174,7 @@ const renderList = (): void => {
     selectedId,
     ariaLabel: 'Timer types',
     onSelect: (id: string) => {
-      selectedId = id;
+      selectType(id);
       render();
     },
   });
@@ -242,6 +248,12 @@ const tick = (): void => {
   if (pending) pending.then(apply, () => undefined);
 };
 
+/** Selects a type and keeps Work Status in step with it. */
+const selectType = (id: string): void => {
+  selectedId = id;
+  writeSelected(host, selectedPreset()).catch(() => undefined);
+};
+
 const persistCustom = (): void => {
   writeCustomPresets(host, presets.filter((preset) => !isBuiltIn(preset.id))).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : 'Could not save your types.';
@@ -271,17 +283,17 @@ const saveDraft = (): void => {
     rounds: input.rounds,
   };
   presets = [...presets, preset];
-  selectedId = preset.id;
   draft.name = '';
   persistCustom();
+  selectType(preset.id);
   render();
 };
 
 const deleteSelected = (): void => {
   if (isBuiltIn(selectedId)) return;
   presets = presets.filter((preset) => preset.id !== selectedId);
-  selectedId = DEFAULT_PRESET_ID;
   persistCustom();
+  selectType(DEFAULT_PRESET_ID);
   render();
 };
 
@@ -289,15 +301,13 @@ const buildLayout = (): void => {
   const timerCard = element('div', 'card');
   timerCard.append(clockEl, phaseEl, progressEl, controlsEl, roundsEl, problemEl);
 
-  const typesCard = element('div', 'card');
-  const typesTitle = element('div', 'card-title');
+  const typesTitle = element('div', 'section-title');
   typesTitle.textContent = 'Types';
-  typesCard.append(typesTitle, listEl);
 
-  const newCard = element('div', 'card');
-  const newTitle = element('div', 'card-title');
-  newTitle.textContent = 'New type';
-  newCard.append(newTitle, fieldsEl, editActionsEl);
+  const accordion = element('details', 'accordion');
+  const summary = element('summary');
+  summary.textContent = 'New type';
+  accordion.append(summary, fieldsEl, editActionsEl);
 
   const footer = element('p', 'footer');
   const credit = element('a');
@@ -309,7 +319,7 @@ const buildLayout = (): void => {
   });
   footer.append(credit);
 
-  root.append(timerCard, typesCard, newCard, footer);
+  root.append(timerCard, typesTitle, listEl, accordion, footer);
 
   mountTextField(fieldsEl, {
     label: 'Name',
@@ -351,9 +361,12 @@ host.onReady((context) => {
   buildLayout();
   render();
 
-  readCustomPresets(host).then(
-    (custom) => {
+  // Restore the type chosen last time, so Work Status and the panel agree.
+  Promise.all([readCustomPresets(host), readSelected(host)]).then(
+    ([custom, chosen]) => {
       presets = [...BUILT_IN_PRESETS, ...custom.filter((preset) => !isBuiltIn(preset.id))];
+      if (chosen && presets.some((preset) => preset.id === chosen.id)) selectedId = chosen.id;
+      selectType(selectedId);
       render();
     },
     () => undefined,

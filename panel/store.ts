@@ -5,6 +5,8 @@ type Host = ReturnType<typeof connectHost>;
 
 export const RUN_KEY = 'run';
 export const PRESETS_KEY = 'presets';
+/** A copy of the type selected in the panel, so Work Status can start it. */
+export const SELECTED_KEY = 'selected';
 
 const STATUSES: readonly RunStatus[] = ['running', 'paused', 'done'];
 
@@ -36,6 +38,14 @@ export const readCustomPresets = async (host: Host): Promise<Preset[]> => {
 
 export const writeCustomPresets = (host: Host, presets: Preset[]): Promise<void> =>
   host.storage.set(PRESETS_KEY, presets);
+
+export const readSelected = async (host: Host): Promise<Preset | null> => {
+  const raw = await host.storage.get(SELECTED_KEY);
+  return isPreset(raw) ? raw : null;
+};
+
+export const writeSelected = (host: Host, preset: Preset): Promise<void> =>
+  host.storage.set(SELECTED_KEY, preset);
 
 const readRun = async (host: Host): Promise<Run | null> => {
   const raw = await host.storage.get(RUN_KEY);

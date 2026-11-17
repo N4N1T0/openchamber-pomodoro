@@ -9,9 +9,12 @@
       body { font-family: var(--oc-font); color: var(--oc-fg); }
       #root { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; min-width: 0; }
       .clock {
-        font-family: var(--oc-mono); font-size: 1.25em; font-weight: 600;
-        font-variant-numeric: tabular-nums; flex: 0 0 auto;
+        font-family: var(--oc-mono); font-size: 1.44em; font-weight: 600;
+        font-variant-numeric: tabular-nums; flex: 0 0 auto; color: var(--oc-fg);
       }
+      .clock[data-phase="work"] { color: var(--oc-primary-text); }
+      .clock[data-phase="rest"] { color: var(--oc-success-text); }
+      .clock[data-paused="true"] { opacity: 0.5; }
       .label {
         flex: 1 1 auto; min-width: 0; color: var(--oc-muted); font-size: 0.85em;
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -20,8 +23,8 @@
   </head>
   <body>
     <div id="root">
-      <span class="clock" id="clock">--:--</span>
-      <span class="label" id="label">No session running</span>
+      <span class="clock" id="clock" data-phase="idle" data-paused="false">--:--</span>
+      <span class="label" id="label">No type selected</span>
     </div>
     <script src="./main.js"></script>
   </body>
