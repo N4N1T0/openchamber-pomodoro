@@ -315,7 +315,7 @@ const buildLayout = (): void => {
   summary.textContent = 'New type';
   accordion.append(summary, fieldsEl, editActionsEl);
 
-  const footer = element('p', 'footer');
+  const footer = element('div', 'site-foot');
   const credit = element('a');
   credit.href = SITE;
   credit.textContent = 'built with love by pomodoro warrior';

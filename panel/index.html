@@ -45,8 +45,16 @@
 
       .fields { display: flex; flex-direction: column; gap: 0.5rem; }
 
-      .footer { margin: 0; padding: 0.25rem 0.75rem 0.75rem; text-align: center; font-size: 0.75em; color: var(--oc-subtle); }
-      .footer a { color: var(--oc-primary-text); text-decoration: underline; cursor: pointer; }
+      .site-foot {
+        margin: 0.25rem 0.75rem 0.75rem; padding-top: 0.5rem;
+        border-top: 1px solid var(--oc-border, #3a3a3a);
+        color: var(--oc-muted, #8b8b8b); font-size: 0.75em; text-align: center;
+      }
+      .site-foot a {
+        color: var(--oc-muted, #8b8b8b); text-decoration: underline; text-underline-offset: 2px;
+        cursor: pointer;
+      }
+      .site-foot a:hover { color: var(--oc-primary-text, var(--oc-fg, #e6e6e6)); }
     </style>
   </head>
   <body>
