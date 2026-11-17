@@ -1,0 +1,32 @@
+{
+  "name": "openchamber-pomodoro",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "openchamber": {
+    "apiVersion": 1,
+    "engines": {
+      "openchamber": ">=2.7.2"
+    },
+    "id": "pomodoro-timer",
+    "name": "Pomodoro",
+    "icon": "assets/pomodoro.svg",
+    "contributes": {
+      "panel": {
+        "entry": "panel/index.html"
+      },
+      "statusSection": {
+        "entry": "status/index.html",
+        "title": "Pomodoro",
+        "height": 44,
+        "defaultExpanded": true
+      }
+    }
+  },
+  "dependencies": {
+    "@openchamber/sdk": "2.7.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4"
+  }
+}
